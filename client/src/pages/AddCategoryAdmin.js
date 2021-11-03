@@ -7,13 +7,15 @@ import NavbarAdmin from "../components/NavbarAdmin";
 import dataCategory from "../fakeData/category";
 
 // Get API config here ...
+import { API } from "../config/api";
 
 export default function AddCategoryAdmin() {
   console.clear();
 
   let history = useHistory();
-  
+
   // Store data with useState here ...
+  const [category, setCategory] = useState("");
 
   const title = "Category admin";
   document.title = "DumbMerch | " + title;
@@ -27,12 +29,17 @@ export default function AddCategoryAdmin() {
       e.preventDefault();
 
       // Create Configuration Content-type here ...
-      // Content-type: application/json
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
 
       // Convert form data to string here ...
-
+      const body = JSON.stringify({ name: category });
+      console.log(body);
       // Insert data category for login process here ...
-
+      await API.post("/category", body, config);
       history.push("/category-admin");
     } catch (error) {
       console.log(error);

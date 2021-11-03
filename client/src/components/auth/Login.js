@@ -4,6 +4,7 @@ import { useHistory } from "react-router-dom";
 import { Alert } from "react-bootstrap";
 
 // Get API config here ...
+import { API, setAuthToken } from "../../config/api";
 
 export default function Login() {
   let history = useHistory();
@@ -14,8 +15,12 @@ export default function Login() {
   const [state, dispatch] = useContext(UserContext);
 
   const [message, setMessage] = useState(null);
-  
+
   // Store data with useState here ...
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
 
   const { email, password } = form;
 
@@ -32,13 +37,20 @@ export default function Login() {
 
       // Create Configuration Content-type here ...
       // Content-type: application/json
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
 
       // Convert form data to string here ...
+      const body = JSON.stringify(form);
 
-      // Insert data user for login process here ...
-
+      // Insert data user for login process ...
+      const response = await API.post("/login", body, config);
+      setAuthToken(response.data.data.token);
       // Checking process
-      if (response?.status == 200) {
+      if (response?.status === 200) {
         // Send data to useContext
         dispatch({
           type: "LOGIN_SUCCESS",
@@ -46,7 +58,7 @@ export default function Login() {
         });
 
         // Status check
-        if (response.data.data.status == "admin") {
+        if (response.data.data.status === "admin") {
           history.push("/complain-admin");
         } else {
           history.push("/");
@@ -73,10 +85,7 @@ export default function Login() {
   return (
     <div className="d-flex justify-content-center">
       <div className="card-auth p-4">
-        <div
-          style={{ fontSize: "36px", lineHeight: "49px", fontWeight: "700" }}
-          className="mb-3"
-        >
+        <div style={{ fontSize: "36px", lineHeight: "49px", fontWeight: "700" }} className="mb-3">
           Login
         </div>
         {message && message}

@@ -4,6 +4,7 @@ import { useHistory } from "react-router-dom";
 import { Alert } from "react-bootstrap";
 
 // Get API config here ...
+import { API } from "../../config/api";
 
 export default function Register() {
   let history = useHistory();
@@ -15,7 +16,11 @@ export default function Register() {
 
   const [message, setMessage] = useState(null);
 
-  // Store data with useState here ...
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
 
   const { name, email, password } = form;
 
@@ -31,14 +36,19 @@ export default function Register() {
       e.preventDefault();
 
       // Create Configuration Content-type here ...
-      // Content-type: application/json
-  
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
       // Convert form data to string here ...
+      const body = JSON.stringify(form);
 
       // Insert data user to database here ...
-
+      const response = await API.post("/register", body, config);
       // Notification
-      if (response.data.status == "success...") {
+      if (response.data.status === "success...") {
         const alert = (
           <Alert variant="success" className="py-1">
             Success
@@ -67,10 +77,7 @@ export default function Register() {
   return (
     <div className="d-flex justify-content-center">
       <div className="card-auth p-4">
-        <div
-          style={{ fontSize: "36px", lineHeight: "49px", fontWeight: "700" }}
-          className="mb-2"
-        >
+        <div style={{ fontSize: "36px", lineHeight: "49px", fontWeight: "700" }} className="mb-2">
           Register
         </div>
         {message && message}
