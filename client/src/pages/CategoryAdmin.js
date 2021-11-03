@@ -9,6 +9,7 @@ import dataCategory from "../fakeData/category";
 import imgEmpty from "../assets/empty.svg";
 
 // Get API config here ...
+import { API } from "../config/api";
 
 export default function CategoryAdmin() {
   let history = useHistory();
@@ -17,10 +18,22 @@ export default function CategoryAdmin() {
   document.title = "DumbMerch | " + title;
 
   // Create Variabel for store categories data here ...
+  const [categories, setCategories] = useState([]);
 
   // Create function get categories data by id from database here ...
+  const getCategories = async () => {
+    try {
+      const response = await API.get("/categories");
+      setCategories(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // Call function get categories with useEffect didMount here ...
+  useEffect(() => {
+    getCategories();
+  }, []);
 
   const [category, setCategory] = useState(dataCategory);
   const [idDelete, setIdDelete] = useState(null);
@@ -64,16 +77,12 @@ export default function CategoryAdmin() {
             <div className="text-header-category mb-4">List Category</div>
           </Col>
           <Col className="text-end">
-            <Button
-              onClick={addCategory}
-              className="btn-dark"
-              style={{ width: "100px" }}
-            >
+            <Button onClick={addCategory} className="btn-dark" style={{ width: "100px" }}>
               Add
             </Button>
           </Col>
           <Col xs="12">
-            {category.length != 0 ? (
+            {categories.length != 0 ? (
               <Table striped hover size="lg" variant="dark">
                 <thead>
                   <tr>
@@ -117,22 +126,14 @@ export default function CategoryAdmin() {
               </Table>
             ) : (
               <div className="text-center pt-5">
-                <img
-                  src={imgEmpty}
-                  className="img-fluid"
-                  style={{ width: "40%" }}
-                />
+                <img src={imgEmpty} className="img-fluid" style={{ width: "40%" }} />
                 <div className="mt-3">No data category</div>
               </div>
             )}
           </Col>
         </Row>
       </Container>
-      <DeleteData
-        setConfirmDelete={setConfirmDelete}
-        show={show}
-        handleClose={handleClose}
-      />
+      <DeleteData setConfirmDelete={setConfirmDelete} show={show} handleClose={handleClose} />
     </>
   );
 }

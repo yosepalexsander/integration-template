@@ -13,6 +13,7 @@ import dataTransaction from "../fakeData/transaction";
 import imgBlank from "../assets/blank-profile.png";
 
 // Get API config here ...
+import { API } from "../config/api";
 
 export default function Profile() {
   const title = "Profile";
@@ -21,14 +22,39 @@ export default function Profile() {
   const [state] = useContext(UserContext);
 
   // Create Variabel for store profile data here ...
+  const [profile, setProfile] = useState({});
   // Create Variabel for store transactions data here ...
+  const [transactions, setTransactions] = useState([]);
 
   // Create function get profile data by id from database here ...
+  const getProfile = async () => {
+    try {
+      const response = await API.get("/profile");
+      // Store product data to useState variabel
+      setProfile(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   // Create function get transactions data from database here ...
-
-  // Call function get product with useEffect didMount here ...
+  const getTransactions = async () => {
+    try {
+      const response = await API.get("/transactions");
+      console.log(response);
+      setTransactions(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // Call function get profile with useEffect didMount here ...
+  useEffect(() => {
+    getProfile();
+  }, []);
   // Call function get transactions with useEffect didMount here ...
-
+  useEffect(() => {
+    getTransactions();
+  }, []);
+  console.log(transactions);
   return (
     <>
       <Navbar title={title} />
@@ -60,7 +86,7 @@ export default function Profile() {
           </Col>
           <Col md="6">
             <div className="text-header-product mb-4">My Transaction</div>
-            {transactions.length != 0 ? (
+            {transactions?.length != 0 ? (
               <>
                 {transactions?.map((item) => (
                   <div style={{ background: "#303030" }} className="p-2 mb-1">

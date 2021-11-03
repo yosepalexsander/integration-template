@@ -15,14 +15,7 @@ exports.getTransactions = async (req, res) => {
           model: product,
           as: "product",
           attributes: {
-            exclude: [
-              "createdAt",
-              "updatedAt",
-              "idUser",
-              "qty",
-              "price",
-              "desc",
-            ],
+            exclude: ["createdAt", "updatedAt", "idUser", "qty", "price", "desc"],
           },
         },
         {
@@ -49,7 +42,7 @@ exports.getTransactions = async (req, res) => {
         ...item,
         product: {
           ...item.product,
-          image: process.env.PATH_FILE + item.product.image,
+          image: process.env.PATH_FILE + item.product?.image,
         },
       };
     });
