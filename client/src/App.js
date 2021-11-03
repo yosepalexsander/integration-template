@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { Switch, Route, useHistory } from "react-router-dom";
 import { UserContext } from "./context/userContext";
 
@@ -16,19 +16,44 @@ import AddProductAdmin from "./pages/AddProductAdmin";
 import EditProductAdmin from "./pages/EditProductAdmin";
 
 // Get API config & setAuthToken here ...
+import { API, setAuthToken } from "./config/api";
 
 // Init token on axios every time the app is refreshed here ...
+if (localStorage.token) {
+  setAuthToken(localStorage.token);
+}
 
 function App() {
   let history = useHistory();
-  
-  // Init user context here ...
 
-  // Redirect Auth here ...
+  // Init user context here ...
+  const [, dispatch] = useContext(UserContext);
 
   // Create function for check user token here ...
+  const checkUser = async () => {
+    try {
+      const response = await API.get("/check-auth");
 
+      if (response.status !== 200) {
+        dispatch({
+          type: "AUTH_ERROR",
+        });
+      }
+
+      let payload = response.data.data.user;
+      payload.token = localStorage.token;
+      dispatch({
+        type: "AUTH_SUCCESS",
+        payload,
+      });
+    } catch (error) {
+      history.push("/auth");
+    }
+  };
   // Call function check user with useEffect didMount here ...
+  useEffect(() => {
+    checkUser();
+  }, []);
 
   return (
     <Switch>
