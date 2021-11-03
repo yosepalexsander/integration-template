@@ -9,6 +9,7 @@ import dataCategory from "../fakeData/category";
 import imgEmpty from "../assets/empty.svg";
 
 // Get API config here ...
+import { API } from "../config/api";
 
 export default function CategoryAdmin() {
   let history = useHistory();
@@ -20,8 +21,12 @@ export default function CategoryAdmin() {
   const [categories, setCategories] = useState([]);
 
   // Create variabel for id category and confirm delete data with useState here ...
-
+  const [idDelete, setIdDelete] = useState(null);
   // Init useState & function for handle show-hide modal confirm here ...
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   // Fetching categories data from database
   const getCategories = async () => {
@@ -43,11 +48,30 @@ export default function CategoryAdmin() {
   };
 
   // Create function handle get id category & show modal confirm delete data here ...
+  const handleDelete = (id) => {
+    setIdDelete(id);
+    handleShow();
+  };
 
   /// Create function for handle delete category here ...
   // If confirm is true, execute delete data
+  const deleteById = async (id) => {
+    try {
+      await API.delete(`/category/${id}`);
+      getCategories();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // Call function for handle close modal and execute delete data with useEffect here ...
+  useEffect(() => {
+    if (confirmDelete) {
+      handleClose();
+      deleteById(idDelete);
+      setConfirmDelete(null);
+    }
+  }, [confirmDelete]);
 
   const addCategory = () => {
     history.push("/add-category");
