@@ -7,6 +7,7 @@ import NavbarAdmin from "../components/NavbarAdmin";
 import dataCategory from "../fakeData/category";
 
 // Get API config here ...
+import { API } from "../config/api";
 
 export default function UpdateCategoryAdmin() {
   const title = "Category admin";
@@ -16,10 +17,20 @@ export default function UpdateCategoryAdmin() {
   const { id } = useParams();
 
   // Create Variabel for store category data here ...
+  const [category, setCategory] = useState({});
 
   // Create function get category data by id from database here ...
+  const getCategory = async (id) => {
+    try {
+      const response = await API.get("/category/" + id);
+      setCategory(response.data.data);
+    } catch (error) {}
+  };
 
   // Call function get category data by id with useEffect didMount here ...
+  useEffect(() => {
+    getCategory(id);
+  }, []);
 
   const handleChange = (e) => {
     setCategory({
@@ -29,6 +40,24 @@ export default function UpdateCategoryAdmin() {
   };
 
   // Create function for handle submit data ...
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
+      const body = JSON.stringify(category);
+
+      const response = await API.patch("/category/" + id, body, config);
+      console.log(response.data);
+      history.push("/category-admin");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <>

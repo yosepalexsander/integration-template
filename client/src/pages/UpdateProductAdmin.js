@@ -8,6 +8,7 @@ import CheckBox from "../components/form/CheckBox";
 import dataProduct from "../fakeData/product";
 
 // Get API config here ...
+import { API } from "../config/api";
 
 export default function UpdateProductAdmin() {
   const title = "Product admin";
@@ -22,18 +23,109 @@ export default function UpdateProductAdmin() {
   const [product, setProduct] = useState({}); //Store product data
 
   // Create Variabel for store product data here ...
-
+  const [form, setForm] = useState({
+    image: "",
+    name: "",
+    desc: "",
+    price: "",
+    qty: "",
+  });
   // Create function get product data by id from database here ...
+  const getProduct = async (id) => {
+    try {
+      const response = await API.get("/product/" + id);
+      setPreview(response.data.data.image);
+
+      setForm({
+        ...form,
+        name: response.data.data.name,
+        desc: response.data.desc,
+        price: response.data.price,
+        qty: response.data.qty,
+      });
+      setProduct(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   // Create function get category data by id from database here ...
+  const getCategories = async () => {
+    try {
+      const response = await API.get("/categories");
+      setCategories(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // Call function get product with useEffect didMount here ...
-  // Call function get category with useEffect didMount here ...
+  useEffect(() => {
+    getProduct(id);
+    getCategories();
+  }, []);
 
   // Create function for handle if category selected here ...
+  const handleChangeCategoryId = (e) => {
+    const id = e.target.value;
+    const checked = e.target.checked;
+
+    if (checked) {
+      // Save category id if checked
+      setCategoryId([...categoryId, parseInt(id)]);
+    } else {
+      // Delete category id from variable if unchecked
+      let newCategoryId = categoryId.filter((categoryIdItem) => {
+        return categoryIdItem != id;
+      });
+      setCategoryId(newCategoryId);
+    }
+  };
 
   // Create function for handle change data on form here ...
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.type === "file" ? e.target.files : e.target.value,
+    });
+
+    // Create image url for preview
+    if (e.target.type === "file") {
+      let url = URL.createObjectURL(e.target.files[0]);
+      setPreview(url);
+    }
+  };
 
   // Create function for handle submit data ...
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
+
+      // Configuration
+      const config = {
+        headers: {
+          "Content-type": "multipart/form-data",
+        },
+      };
+
+      // Store data with FormData as object
+      const formData = new FormData();
+      formData.set("image", form.image[0], form.image[0].name);
+      formData.set("name", form.name);
+      formData.set("desc", form.desc);
+      formData.set("price", form.price);
+      formData.set("qty", form.qty);
+      formData.set("categoryId", categoryId);
+
+      // Insert product data
+      const response = await API.patch("/product/" + id, formData, config);
+      console.log(response.data);
+
+      history.push("/product-admin");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // Get category id selected
   useEffect(() => {
@@ -63,16 +155,11 @@ export default function UpdateProductAdmin() {
                       maxHeight: "150px",
                       objectFit: "cover",
                     }}
+                    alt="preview"
                   />
                 </div>
               )}
-              <input
-                type="file"
-                id="upload"
-                name="image"
-                hidden
-                onChange={handleChange}
-              />
+              <input type="file" id="upload" name="image" hidden onChange={handleChange} />
               <label for="upload" className="label-file-add-product">
                 Upload file
               </label>
@@ -110,10 +197,7 @@ export default function UpdateProductAdmin() {
               />
 
               <div className="card-form-input mt-4 px-2 py-1 pb-2">
-                <div
-                  className="text-secondary mb-1"
-                  style={{ fontSize: "15px" }}
-                >
+                <div className="text-secondary mb-1" style={{ fontSize: "15px" }}>
                   Category
                 </div>
                 {product &&
