@@ -4,8 +4,10 @@ import { useHistory } from "react-router-dom";
 import { Alert } from "react-bootstrap";
 
 // Import useMutation from react-query here ...
+import { useMutation } from "react-query";
 
 // Get API config here ...
+import { API } from "../../config/api";
 
 export default function Login() {
   const title = "Login";
@@ -19,6 +21,10 @@ export default function Login() {
   const [message, setMessage] = useState(null);
 
   // Create variabel for store data with useState here ...
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
 
   const { email, password } = form;
 
@@ -30,14 +36,47 @@ export default function Login() {
   };
 
   // Create function for handle login process with useMutation here ...
+  const handleSubmit = useMutation(async (e) => {
+    e.preventDefault();
+    try {
+      const body = JSON.stringify(form);
+
+      const config = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body,
+      };
+      const response = await api.post("/login", config);
+
+      if (response.status === "success") {
+        dispatch({
+          type: "LOGIN_SUCCESS",
+          payload: response.data,
+        });
+
+        if (response.data.status === "admin") {
+          history.push("/complain-admin");
+        } else {
+          history.push("/");
+        }
+      }
+    } catch (error) {
+      const alert = (
+        <Alert variant="danger" className="py-1">
+          Failed
+        </Alert>
+      );
+      setMessage(alert);
+      console.error(error);
+    }
+  });
 
   return (
     <div className="d-flex justify-content-center">
       <div className="card-auth p-4">
-        <div
-          style={{ fontSize: "36px", lineHeight: "49px", fontWeight: "700" }}
-          className="mb-3"
-        >
+        <div style={{ fontSize: "36px", lineHeight: "49px", fontWeight: "700" }} className="mb-3">
           Login
         </div>
         {message && message}

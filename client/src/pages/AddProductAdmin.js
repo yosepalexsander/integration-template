@@ -4,9 +4,11 @@ import { useHistory } from "react-router";
 
 import NavbarAdmin from "../components/NavbarAdmin";
 
-// Import useMutation and useQuery from react-query here ...
+// Import useMutation from react-query here ...
+import { useMutation, useQuery } from "react-query";
 
 // Get API config here ...
+import { API } from "../config/api";
 
 export default function AddProductAdmin() {
   const title = "Product admin";
@@ -19,6 +21,13 @@ export default function AddProductAdmin() {
   const [preview, setPreview] = useState(null); //For image preview
 
   // Create variabel for store data with useState here ...
+  const [form, setForm] = useState({
+    image: "",
+    name: "",
+    desc: "",
+    price: "",
+    qty: "",
+  });
 
   // Fetching category data
   let { data: categories, refetch } = useQuery("categoriesCache", async () => {
@@ -58,7 +67,31 @@ export default function AddProductAdmin() {
   };
 
   // Create function for handle insert product data with useMutation here ...
+  const handleSubmit = useMutation(async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      formData.set("image", form.image[0]);
+      formData.set("name", form.name);
+      formData.set("desc", form.desc);
+      formData.set("price", form.price);
+      formData.set("qty", form.qty);
+      formData.set("categoryId", categoryId);
 
+      const config = {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: formData,
+      };
+      const response = await api.post("/product", config);
+      console.log(response);
+      history.push("/product-admin");
+    } catch (error) {
+      console.log(error);
+    }
+  });
   return (
     <>
       <NavbarAdmin title={title} />
