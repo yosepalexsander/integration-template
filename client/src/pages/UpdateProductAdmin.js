@@ -7,9 +7,11 @@ import CheckBox from "../components/form/CheckBox";
 
 import dataProduct from "../fakeData/product";
 
-// Import useQuery and useMutation here ...
+// Import useQuery
+import { useQuery, useMutation } from "react-query";
 
-// Get API config here ...
+// API config
+import { API } from "../config/api";
 
 export default function UpdateProductAdmin() {
   const title = "Product admin";
@@ -24,16 +26,94 @@ export default function UpdateProductAdmin() {
   const [preview, setPreview] = useState(null); //For image preview
   const [product, setProduct] = useState({}); //Store product data
 
-  // Create variabel for store data with useState here ...
+  const [form, setForm] = useState({
+    image: "",
+    name: "",
+    desc: "",
+    price: "",
+    qty: "",
+  }); //Store product data
 
   // Create process for handle fetching detail product data by id from database with useQuery here ...
-  // Create process for handle fetching category data from database with useQuery here ...
+  const { refetch } = useQuery("productCache", async () => {
+    const config = {
+      headers: {
+        Authorization: "Bearer " + localStorage.token,
+      },
+    };
 
-  // Create function for handle if category selected here ...
+    const response = await api.get("/product/" + id, config);
 
-  // Create function for handle change data on form variabel here ...
+    setForm({
+      ...response.data,
+    });
+    setProduct(response.data);
+  });
+  // Fetching category data
+  let { refetch: categoriesRefetch } = useQuery("categoriesCache", async () => {
+    const response = await api.get("/categories");
+    setCategories(response.data);
+  });
+
+  // For handle if category selected
+  const handleChangeCategoryId = (e) => {
+    const id = e.target.value;
+    const checked = e.target.checked;
+
+    if (checked) {
+      // Save category id if checked
+      setCategoryId([...categoryId, parseInt(id)]);
+    } else {
+      // Delete category id from variable if unchecked
+      let newCategoryId = categoryId.filter((categoryIdItem) => {
+        return categoryIdItem != id;
+      });
+      setCategoryId(newCategoryId);
+    }
+  };
+
+  // Handle change data on form
+  const handleChange = (e) => {
+    console.log(e.target.files);
+    setForm({
+      ...form,
+      [e.target.name]: e.target.type === "file" ? e.target.files : e.target.value,
+    });
+
+    // Create image url for preview
+    if (e.target.type === "file") {
+      setPreview(e.target.files);
+    }
+  };
 
   // Create function for handle insert new product data with useMutation here ...
+  const handleSubmit = useMutation(async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      if (preview) {
+        formData.set("image", preview[0]);
+      }
+      formData.set("name", form.name);
+      formData.set("desc", form.desc);
+      formData.set("price", form.price);
+      formData.set("qty", form.qty);
+      formData.set("categoryId", categoryId);
+
+      const config = {
+        method: "PATCH",
+        headers: {
+          Authorization: "Bearer " + localStorage.token,
+        },
+        body: formData,
+      };
+
+      const response = await api.patch("/product/" + id, config);
+      history.push("/product-admin");
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
   useEffect(() => {
     const newCategoryId = product?.categories?.map((item) => {
