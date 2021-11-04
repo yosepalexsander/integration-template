@@ -9,8 +9,10 @@ import dataCategory from "../fakeData/category";
 import imgEmpty from "../assets/empty.svg";
 
 // Import useQuery here ...
+import { useQuery } from "react-query";
 
 // Get API config here ...
+import { API } from "../config/api";
 
 export default function CategoryAdmin() {
   const title = "Category admin";
@@ -28,6 +30,10 @@ export default function CategoryAdmin() {
   const handleShow = () => setShow(true);
 
   // Create process for fetching categories data from database with useQuery here ...
+  let { data: categories, refetch } = useQuery("categoriesCache", async () => {
+    const response = await api.get("/categories");
+    return response.data;
+  });
 
   const handleEdit = (id) => {
     history.push(`edit-category/${id}`);

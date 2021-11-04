@@ -12,14 +12,28 @@ import imgEmpty from "../assets/empty.svg";
 import dataProduct from "../fakeData/product";
 
 // Import useQuery here ...
+import { useQuery } from "react-query";
 
 // Get API config here ...
+import { API } from "../config/api";
 
 export default function ProductAdmin() {
   let history = useHistory();
   let api = API();
 
   // Create process for fetching products data from database with useQuery here ...
+  const { data: products, refetch } = useQuery("productsCache", async () => {
+    const config = {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + localStorage.token,
+      },
+    };
+
+    const response = await api.get("/products", config);
+
+    return response.data;
+  });
 
   const [product, setProduct] = useState(dataProduct);
   const [idDelete, setIdDelete] = useState(null);

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { BrowserRouter as Router } from "react-router-dom";
 // Init QueryClient and QueryClientProvider
 import { QueryClient, QueryClientProvider } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
@@ -25,6 +26,7 @@ ReactDOM.render(
         <Router>
           <App />
         </Router>
+        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </UserContextProvider>
   </React.StrictMode>,

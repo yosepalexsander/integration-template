@@ -8,8 +8,10 @@ import Navbar from "../components/Navbar";
 import dataProduct from "../fakeData/product";
 
 // Import useQuery and useMutation here ...
+import { useQuery, useMutation } from "react-query";
 
 // Get API config here ...
+import { API } from "../config/api";
 
 export default function DetailProduct() {
   let history = useHistory();
@@ -17,8 +19,44 @@ export default function DetailProduct() {
   let api = API();
 
   // Create process for fetching product by id data from database with useQuery here ...
+  const { data: product, refetch } = useQuery("productCache", async () => {
+    const config = {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + localStorage.token,
+      },
+    };
+
+    const response = await api.get("/product/" + id, config);
+
+    return response.data;
+  });
 
   // Create function for handle buying process with useMutation here ...
+  const handleBuy = useMutation(async () => {
+    try {
+      const data = {
+        idProduct: product.id,
+        idSeller: product.user.id,
+        price: product.price,
+      };
+
+      const body = JSON.stringify(data);
+      const config = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.token,
+        },
+        body,
+      };
+
+      await api.post("/transaction", config);
+      history.push("/profile");
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
   return (
     <div>
@@ -34,7 +72,11 @@ export default function DetailProduct() {
             <div className="text-content-product-detail">Stock : {product?.qty}</div>
             <p className="text-content-product-detail mt-4">{product?.desc}</p>
             <div className="text-price-product-detail text-end mt-4">{convertRupiah.convert(product?.price)}</div>
-            <div className="d-grid gap-2 mt-5">{/* Create button buy and handle with mutate here ... */}</div>
+            <div className="d-grid gap-2 mt-5">
+              <button onClick={() => handleBuy.mutate()} className="btn btn-buy">
+                Buy
+              </button>
+            </div>
           </Col>
         </Row>
       </Container>
