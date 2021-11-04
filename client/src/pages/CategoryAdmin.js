@@ -9,9 +9,11 @@ import dataCategory from "../fakeData/category";
 
 import imgEmpty from "../assets/empty.svg";
 
-// Import useQuery and useMutation here ...
+// Import useQuery and useMutation
+import { useQuery, useMutation } from "react-query";
 
-// Get API config here ...
+// Get API config
+import { API } from "../config/api";
 
 export default function CategoryAdmin() {
   const title = "Category admin";
@@ -21,8 +23,13 @@ export default function CategoryAdmin() {
   let api = API();
 
   // Create variabel for delete category data with useState here ...
+  const [idDelete, setIdDelete] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   // Init useState & function for handle show-hide modal confirm here ...
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   // Fetching categories data from database
   let { data: categories, refetch } = useQuery("categoriesCache", async () => {
@@ -35,11 +42,37 @@ export default function CategoryAdmin() {
   };
 
   // Create function handle get category id & show modal confirm delete data here ...
+  const handleDelete = (id) => {
+    setIdDelete(id);
+    handleShow();
+  };
 
   // Create function for handle delete category with useMutation here ...
-  // If confirm is true, execute delete data
+  const deleteById = useMutation(async (id) => {
+    try {
+      const config = {
+        method: "Delete",
+        headers: {
+          Authorization: "Bearer " + localStorage.token,
+        },
+      };
+
+      await api.delete("/category/" + id, config);
+      refetch();
+    } catch (err) {
+      console.log(err);
+    }
+  });
 
   // Call function for handle close modal and execute delete data with useEffect here ...
+  // If confirm is true, execute delete data
+  useEffect(() => {
+    if (confirmDelete) {
+      handleClose();
+      deleteById.mutate(idDelete);
+      setConfirmDelete(null);
+    }
+  }, [confirmDelete]);
 
   const addCategory = () => {
     history.push("/add-category");

@@ -11,17 +11,24 @@ import imgEmpty from "../assets/empty.svg";
 
 import dataProduct from "../fakeData/product";
 
-// Import useQuery and useMutation here ...
+// Import useQuery and useMutation
+import { useQuery, useMutation } from "react-query";
 
-// Get API config here ...
+// Get API config
+import { API } from "../config/api";
 
 export default function ProductAdmin() {
   let history = useHistory();
   let api = API();
 
-  // Create variabel for delete product data with useState here ...
+  // Create variabel for delete category data with useState here ...
+  const [idDelete, setIdDelete] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   // Init useState & function for handle show-hide modal confirm here ...
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   const title = "Product admin";
   document.title = "DumbMerch | " + title;
@@ -46,12 +53,38 @@ export default function ProductAdmin() {
     history.push("/edit-product/" + id);
   };
 
-  // Create function handle get product id & show modal confirm delete data here ...
+  // Create function handle get category id & show modal confirm delete data here ...
+  const handleDelete = (id) => {
+    setIdDelete(id);
+    handleShow();
+  };
 
-  // Create function for handle delete product with useMutation here ...
-  // If confirm is true, execute delete data
+  // Create function for handle delete category with useMutation here ...
+  const deleteById = useMutation(async (id) => {
+    try {
+      const config = {
+        method: "Delete",
+        headers: {
+          Authorization: "Bearer " + localStorage.token,
+        },
+      };
+
+      await api.delete("/product/" + id, config);
+      refetch();
+    } catch (err) {
+      console.log(err);
+    }
+  });
 
   // Call function for handle close modal and execute delete data with useEffect here ...
+  // If confirm is true, execute delete data
+  useEffect(() => {
+    if (confirmDelete) {
+      handleClose();
+      deleteById.mutate(idDelete);
+      setConfirmDelete(null);
+    }
+  }, [confirmDelete]);
 
   return (
     <>
